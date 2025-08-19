@@ -156,8 +156,10 @@ jobs:
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
           meson setup build --default-library=static --prefix=/usr --libdir=lib
+          echo "About to start ninja build"
           sudo ninja -C build
           sudo ninja -C build install
+          echo "Ninja build done"
           find /usr -type d -name "*pkg-config*"
           echo '#!/bin/sh\nexec pkg-config "$@"' > /usr/local/bin/x86_64-linux-musl-pkg-config && chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
