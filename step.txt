@@ -60,3 +60,8 @@ cargo install cross --git https://github.com/cross-rs/cross     [X]
 -----
 PKG_CONFIG_ALLOW_CROSS=1 yarn build ✅
 -----
+
+---
+choco install pkgconfiglite
+vcpkg install dav1d. ✅ stable - x86_64-pc-windows-msvc - node@22
+---
