@@ -154,6 +154,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nasm
           vcpkg install pkgconf dav1d
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/ppackages/dav1d_x64-linux/lib/pkgconfig:${{ github.workspace }}/vcpkg/packages/dav1d_x64-linux/lib/pkgconfig" >> $GITHUB_ENV
       - name: Setup windows dependencies (x86_64-pc-windows-msvc)
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
         run: |
