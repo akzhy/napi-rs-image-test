@@ -160,7 +160,7 @@ jobs:
           sudo ninja -C build
           sudo ninja -C build install
           echo "Ninja build done"
-          ls /usr/include/dav1d
+          find ~/ -type d -name "x86_64-linux-musl*"
           echo '#!/bin/sh\nexec pkg-config "$@"' | sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null
           sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
