@@ -1,0 +1,62 @@
+brew install pkgconf
+
+---
+
+thread 'main' panicked at .cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dav1d-sys-0.8.3/build.rs:82:10:
+  called `Result::unwrap()` on an `Err` value: PkgConfig(
+  pkg-config exited with status code 1
+  > PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags dav1d 'dav1d >= 1.3.0'
+
+  The system library `dav1d` required by crate `dav1d-sys` was not found.
+  The file `dav1d.pc` needs to be installed and the PKG_CONFIG_PATH environment variable must contain its parent directory.
+  The PKG_CONFIG_PATH environment variable is not set.
+
+  HINT: if you have installed the library, try setting PKG_CONFIG_PATH to the directory containing `dav1d.pc`.
+  )
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...
+Internal Error: Build failed with exit code 101
+    at ChildProcess.<anonymous> (file://Documents/napi-rs-image-test/node_modules/@napi-rs/cli/dist/cli.js:1433:35)
+    at Object.onceWrapper (node:events:634:26)
+    at ChildProcess.emit (node:events:531:35)
+    at ChildProcess._handle.onexit (node:internal/child_process:294:12)
+
+---
+
+brew install dav1d
+
+---
+✅
+---
+ yarn build --target x86_64-apple-darwin
+
+
+   Compiling proc-macro2 v1.0.101
+   Compiling unicode-ident v1.0.18
+   Compiling cfg-if v1.0.1
+   Compiling autocfg v1.5.0
+   Compiling serde v1.0.219
+   Compiling crossbeam-utils v0.8.21
+   Compiling equivalent v1.0.2
+   Compiling target-lexicon v0.13.2
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-apple-darwin` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-apple-darwin`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `cfg-if` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+Internal Error: Build failed with exit code 101
+    at ChildProcess.<anonymous> (file:///Users/akshay/Documents/napi-rs-image-test/node_modules/@napi-rs/cli/dist/cli.js:1433:35)
+    at Object.onceWrapper (node:events:634:26)
+    at ChildProcess.emit (node:events:531:35)
+    at ChildProcess._handle.onexit (node:internal/child_process:294:12)
+
+---
+cargo install cross --git https://github.com/cross-rs/cross     [X]
+---
+
+-----
+PKG_CONFIG_ALLOW_CROSS=1 yarn build ✅
+-----
