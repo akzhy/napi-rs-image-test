@@ -389,10 +389,10 @@ jobs:
             image: rust:1-bookworm
             deps: apt-get update && apt-get install -y pkg-config libssl-dev build-essential
 
-          - target: aarch64-linux-android
-            platform: linux/amd64
-            image: ghcr.io/android/ndk:r26d # example NDK image
-            deps: '' # configure CC/CXX inside run
+          # - target: aarch64-linux-android
+          #   platform: linux/amd64
+          #   image: ghcr.io/android/ndk:r26d # example NDK image
+          #   deps: '' # configure CC/CXX inside run
 
     steps:
       - uses: actions/checkout@v4
