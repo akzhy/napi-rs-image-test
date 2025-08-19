@@ -155,11 +155,10 @@ jobs:
           sudo apt-get install -y nasm meson ninja-build
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
-          meson setup build --default-library=static --prefix=$HOME/dav1d-install --libdir=lib
+          meson setup build --default-library=static --prefix=/usr --libdir=lib \
           ninja -C build
           ninja -C build install
-          echo "PKG_CONFIG_PATH=/home/runner/dav1d-install/lib/pkgconfig" >> $GITHUB_ENV
-          echo "PKG_CONFIG_ALL_STATIC=1" >> $GITHUB_ENV
+          echo '#!/bin/sh\nexec pkg-config "$@"' > /usr/local/bin/x86_64-linux-musl-pkg-config && chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
