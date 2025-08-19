@@ -153,6 +153,12 @@ jobs:
         run: |
           choco install pkgconfiglite
           vcpkg install dav1d
+
+      - name: Set PKG_CONFIG_PATH
+        if: ${{ matrix.settings.host == 'windows-latest' }}
+        run: |
+          echo "VCPKG_ROOT\installed\x64-windows\lib\pkgconfig"
+          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/x64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_x64-windows/lib/pkgconfig;VCPKG_ROOT\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
       - name: Install dependencies
         run: yarn install
       - name: Build
