@@ -158,6 +158,7 @@ jobs:
           meson setup build --default-library=static --prefix=/usr --libdir=lib
           sudo ninja -C build
           sudo ninja -C build install
+          find /usr -type d -name "*pkg-config*"
           echo '#!/bin/sh\nexec pkg-config "$@"' > /usr/local/bin/x86_64-linux-musl-pkg-config && chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
