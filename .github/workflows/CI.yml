@@ -163,6 +163,8 @@ jobs:
           find ~/ -type d -name "x86_64-linux-musl*"
           echo '#!/bin/sh\nexec pkg-config "$@"' | sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null
           sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
+          ls -l /usr/local/bin/x86_64-linux-musl-pkg-config
+          /usr/local/bin/x86_64-linux-musl-pkg-config --version
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
@@ -202,6 +204,12 @@ jobs:
           echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
       - name: Install dependencies
         run: yarn install
+      - name: Debug pkg-config
+        run: |
+          which pkg-config
+          which x86_64-linux-musl-pkg-config
+          echo $PATH
+          /usr/local/bin/x86_64-linux-musl-pkg-config --libs dav1d
       - name: Build
         run: ${{ matrix.settings.build }}
         shell: bash
@@ -210,6 +218,8 @@ jobs:
           CARGO_FEATURE_VCPKG: 1
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig:/usr/local/lib/pkgconfig
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
