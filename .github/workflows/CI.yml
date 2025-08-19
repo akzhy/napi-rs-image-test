@@ -135,10 +135,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           tool: cargo-zigbuild
+      - uses: lukka/get-cmake@latest
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: 2025.01.12
+          vcpkgGitCommitId: ee0973d8090e4e3e452244bb50d34c25fe907dc2
       - name: Setup toolchain
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
