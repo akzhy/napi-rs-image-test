@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 image = { version = "0.25.6", features = ["avif-native"]}
 napi = {version = "3.0.0", features = ["tokio_rt"]}
 napi-derive = "3.0.0"
-reqwest = "0.12.23"
+reqwest = { version = "0.12.23", default-features = false, features = ["http2", "rustls-tls"] }
 
 [build-dependencies]
 napi-build = "2"
