@@ -156,8 +156,8 @@ jobs:
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
           meson setup build --default-library=static --prefix=/usr --libdir=lib
-          ninja -C build
-          ninja -C build install
+          sudo ninja -C build
+          sudo ninja -C build install
           echo '#!/bin/sh\nexec pkg-config "$@"' > /usr/local/bin/x86_64-linux-musl-pkg-config && chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
