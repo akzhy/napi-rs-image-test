@@ -157,7 +157,7 @@ jobs:
       - name: Install vcpkg dependencies (x86_64-unknown-linux-gnu)
         if: ${{ matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
-          vcpkg install dav1d:x64-linux
+          vcpkg install dav1d
           
       - name: Install cross-compilation toolchain (aarch64)
         if: ${{ contains(matrix.settings.target, 'aarch64') && !contains(matrix.settings.target, 'musl') && !contains(matrix.settings.target, 'android') }}
@@ -257,11 +257,22 @@ jobs:
           echo "CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm-linux/lib/pkgconfig" >> $GITHUB_ENV
           
-      - name: Install vcpkg dependencies (x86_64-unknown-linux-musl)
+      - name: Install musl development tools (x86_64-unknown-linux-musl)
         if: ${{ matrix.settings.target == 'x86_64-unknown-linux-musl' }}
         run: |
-          # For musl targets, we'll rely on static linking with zig
-          echo "Using static linking with zig for musl target"
+          sudo apt-get install -y musl-tools musl-dev
+          # Create static triplet file if needed
+          mkdir -p ${{ github.workspace }}/vcpkg/triplets/community
+          if [ ! -f "${{ github.workspace }}/vcpkg/triplets/community/x64-linux-static.cmake" ]; then
+            cat > ${{ github.workspace }}/vcpkg/triplets/community/x64-linux-static.cmake << 'EOF'
+          set(VCPKG_TARGET_ARCHITECTURE x64)
+          set(VCPKG_CRT_LINKAGE static)
+          set(VCPKG_LIBRARY_LINKAGE static)
+          set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+          EOF
+          fi
+          # Install dav1d development headers for musl
+          vcpkg install dav1d --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community --triplet=x64-linux-static || echo "Using zig static linking"
           
       - name: Setup cross-compilation environment (x86_64-unknown-linux-musl)
         if: ${{ matrix.settings.target == 'x86_64-unknown-linux-musl' }}
@@ -270,14 +281,31 @@ jobs:
           echo "CXX_x86_64_unknown_linux_musl=zig c++ -target x86_64-linux-musl" >> $GITHUB_ENV
           echo "AR_x86_64_unknown_linux_musl=zig ar" >> $GITHUB_ENV
           echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=zig cc -target x86_64-linux-musl" >> $GITHUB_ENV
-          # For musl, disable pkg-config as we'll use static linking
-          echo "PKG_CONFIG=" >> $GITHUB_ENV
+          # Try to use vcpkg libs if available, otherwise use system static libs
+          if [ -d "${{ github.workspace }}/vcpkg/installed/x64-linux-static" ]; then
+            echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-linux-static/lib/pkgconfig" >> $GITHUB_ENV
+          else
+            echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-musl/pkgconfig" >> $GITHUB_ENV
+          fi
+          # Force static linking for musl
+          echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
           
-      - name: Install vcpkg dependencies (aarch64-unknown-linux-musl)
+      - name: Install musl cross-compilation tools (aarch64-unknown-linux-musl)
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
-          # For musl targets, we'll rely on static linking with zig
-          echo "Using static linking with zig for musl target"
+          sudo apt-get install -y musl-tools musl-dev
+          # Create static triplet file if needed
+          mkdir -p ${{ github.workspace }}/vcpkg/triplets/community
+          if [ ! -f "${{ github.workspace }}/vcpkg/triplets/community/arm64-linux-static.cmake" ]; then
+            cat > ${{ github.workspace }}/vcpkg/triplets/community/arm64-linux-static.cmake << 'EOF'
+          set(VCPKG_TARGET_ARCHITECTURE arm64)
+          set(VCPKG_CRT_LINKAGE static)
+          set(VCPKG_LIBRARY_LINKAGE static)
+          set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+          EOF
+          fi
+          # Try to install static libraries via vcpkg
+          vcpkg install dav1d --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community --triplet=arm64-linux-static || echo "Using zig static linking"
           
       - name: Setup cross-compilation environment (aarch64-unknown-linux-musl)
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
@@ -286,8 +314,15 @@ jobs:
           echo "CXX_aarch64_unknown_linux_musl=zig c++ -target aarch64-linux-musl" >> $GITHUB_ENV
           echo "AR_aarch64_unknown_linux_musl=zig ar" >> $GITHUB_ENV
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=zig cc -target aarch64-linux-musl" >> $GITHUB_ENV
-          # For musl, disable pkg-config as we'll use static linking
-          echo "PKG_CONFIG=" >> $GITHUB_ENV
+          # Try to use vcpkg static libs if available, otherwise rely on zig static linking
+          if [ -d "${{ github.workspace }}/vcpkg/installed/arm64-linux-static" ]; then
+            echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm64-linux-static/lib/pkgconfig" >> $GITHUB_ENV
+          else
+            echo "PKG_CONFIG_LIBDIR=" >> $GITHUB_ENV
+            echo "DAV1D_STATIC=1" >> $GITHUB_ENV
+          fi
+          # Force static linking for musl
+          echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
           
       - name: Setup Android dependencies
         if: ${{ matrix.settings.target == 'aarch64-linux-android' }}
