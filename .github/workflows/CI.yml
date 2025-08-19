@@ -160,8 +160,9 @@ jobs:
           sudo ninja -C build
           sudo ninja -C build install
           echo "Ninja build done"
-          find /usr -type d -name "*pkg-config*"
-          echo '#!/bin/sh\nexec pkg-config "$@"' > /usr/local/bin/x86_64-linux-musl-pkg-config && chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
+          ls /usr/local/bin/
+          echo '#!/bin/sh\nexec pkg-config "$@"' | sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null
+          sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
@@ -208,6 +209,8 @@ jobs:
           PKG_CONFIG_ALLOW_CROSS: 1
           CARGO_FEATURE_VCPKG: 1
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
