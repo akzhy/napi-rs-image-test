@@ -151,6 +151,8 @@ jobs:
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' }}
         run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm
           vcpkg install pkgconf dav1d
       - name: Setup windows dependencies (x86_64-pc-windows-msvc)
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
