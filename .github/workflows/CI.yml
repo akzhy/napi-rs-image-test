@@ -159,6 +159,7 @@ jobs:
           ninja -C build
           ninja -C build install
           echo "PKG_CONFIG_PATH=/home/runner/dav1d-install/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_ALL_STATIC=1" >> $GITHUB_ENV
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
