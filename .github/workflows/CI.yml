@@ -335,7 +335,7 @@ jobs:
       id-token: write
     needs:
       - lint
-      - build-freebsd
+      # - build-freebsd
       - test-macOS-windows-binding
       - test-linux-binding
     steps:
