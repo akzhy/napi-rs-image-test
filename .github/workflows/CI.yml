@@ -158,20 +158,16 @@ jobs:
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'i686-pc-windows-msvc' }}
         run: |
           choco install pkgconfiglite
-          vcpkg install dav1d
+          vcpkg install dav1d:x86-windows-static
 
       - name: Set PKG_CONFIG_PATH
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc'}}
         run: |
-          echo "VCPKG_ROOT\installed\x64-windows\lib\pkgconfig"
-          Get-ChildItem $env:VCPKG_ROOT\installed | Select-Object -ExpandProperty Name
           echo "PKG_CONFIG_PATH=C:/vcpkg/installed/x64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_x64-windows/lib/pkgconfig;VCPKG_ROOT\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
 
       - name: Set PKG_CONFIG_PATH
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'i686-pc-windows-msvc'}}
         run: |
-          Get-ChildItem $env:VCPKG_ROOT\installed | Select-Object -ExpandProperty Name
-          echo "VCPKG_ROOT\installed\x64-windows\lib\pkgconfig"
           echo "PKG_CONFIG_PATH=C:/vcpkg/installed/x86-windows-static/lib/pkgconfig;C:/vcpkg/packages/dav1d_x86-windows-static/lib/pkgconfig;VCPKG_ROOT\installed\x86-windows-static\lib\pkgconfig" >> $env:GITHUB_ENV
       - name: Install dependencies
         run: yarn install
