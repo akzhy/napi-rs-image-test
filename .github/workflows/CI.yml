@@ -177,7 +177,7 @@ jobs:
       - name: Set PKG_CONFIG_PATH (aarch64-pc-windows-msvc)
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'aarch64-pc-windows-msvc'}}
         run: |
-          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_aarch64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
       - name: Install dependencies
         run: yarn install
       - name: Build
