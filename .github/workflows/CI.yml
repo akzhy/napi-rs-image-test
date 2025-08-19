@@ -160,9 +160,12 @@ jobs:
           sudo ninja -C build
           sudo ninja -C build install
           echo "Ninja build done"
-          find ~/ -type d -name "x86_64-linux-musl*"
-          echo '#!/bin/sh\nexec pkg-config "$@"' | sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null
+          sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null <<'EOF'
+          #!/bin/sh
+          exec pkg-config "$@"
+          EOF
           sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
+          head -n 5 /usr/local/bin/x86_64-linux-musl-pkg-config
           ls -l /usr/local/bin/x86_64-linux-musl-pkg-config
           /usr/local/bin/x86_64-linux-musl-pkg-config --version
       - name: Setup linux dependencies
