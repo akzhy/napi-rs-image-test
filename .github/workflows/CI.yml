@@ -152,9 +152,13 @@ jobs:
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-musl' }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm
-          vcpkg install pkgconf dav1d --triplet x64-linux-musl
-          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/packages/dav1d_x64-linux-musl/lib/pkgconfig:${{ github.workspace }}/vcpkg/packages/dav1d_x64-linux-musl/lib/pkgconfig" >> $GITHUB_ENV
+          sudo apt-get install -y nasm meson ninja-build
+          git clone https://code.videolan.org/videolan/dav1d.git
+          cd dav1d
+          meson setup build --default-library=static --prefix=$HOME/dav1d-install --libdir=lib
+          ninja -C build
+          ninja -C build install
+          echo "PKG_CONFIG_PATH=$HOME/dav1d-install/lib/pkgconfig" >> $GITHUB_ENV
       - name: Setup linux dependencies
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
