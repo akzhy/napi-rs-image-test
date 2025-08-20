@@ -68,25 +68,25 @@ jobs:
           #   target: aarch64-pc-windows-msvc
           #   build: yarn build --target aarch64-pc-windows-msvc
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            build: yarn build --target x86_64-unknown-linux-gnu
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-gnu
+          #   build: yarn build --target x86_64-unknown-linux-gnu
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu 
-            build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu 
+          #   build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
-          - host: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: armv7-unknown-linux-gnueabihf
+          #   build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
 
-          - host: ubuntu-latest
-            target: aarch64-linux-android
-            build: yarn build --target aarch64-linux-android
+          # - host: ubuntu-latest
+          #   target: aarch64-linux-android
+          #   build: yarn build --target aarch64-linux-android
 
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
@@ -229,11 +229,12 @@ jobs:
       - name: Setup > aarch64-unknown-linux-musl
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
+          # No native musl cross toolchain in Ubuntu repos; use Zig/cargo-zigbuild for cross-compiling
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-musl g++-aarch64-linux-musl musl-tools nasm meson ninja-build build-essential pkg-config
+          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
-          meson setup build --default-library=static --prefix=/usr --libdir=lib --cross-file <(echo '[binaries]\nc = "/usr/bin/aarch64-linux-musl-gcc"\ncxx = "/usr/bin/aarch64-linux-musl-g++"\nar = "/usr/bin/aarch64-linux-musl-ar"\nstrip = "/usr/bin/aarch64-linux-musl-strip"\n[host_machine]\nsystem = "linux"\ncpu_family = "aarch64"\ncpu = "aarch64"\nendian = "little"')
+          meson setup build --default-library=static --prefix=/usr --libdir=lib
           echo "About to start ninja build"
           sudo ninja -C build
           sudo ninja -C build install
