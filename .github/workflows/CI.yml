@@ -48,13 +48,13 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            build: yarn build --target x86_64-apple-darwin
+          # - host: macos-latest
+          #   target: x86_64-apple-darwin
+          #   build: yarn build --target x86_64-apple-darwin
 
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: yarn build --target aarch64-apple-darwin
+          # - host: macos-latest
+          #   target: aarch64-apple-darwin
+          #   build: yarn build --target aarch64-apple-darwin
 
           # - host: windows-latest
           #   build: yarn build --target x86_64-pc-windows-msvc
@@ -90,7 +90,7 @@ jobs:
 
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+            build: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=zig yarn build --target aarch64-unknown-linux-musl --use-napi-cross
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -229,9 +229,10 @@ jobs:
       - name: Setup > aarch64-unknown-linux-musl
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
-          # No native musl cross toolchain in Ubuntu repos; use Zig/cargo-zigbuild for cross-compiling
           sudo apt-get update
-          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config
+          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config gcc-aarch64-linux-gnu
+          
+          # Build dav1d for aarch64-musl
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
           meson setup build --default-library=static --prefix=/usr --libdir=lib
@@ -239,15 +240,23 @@ jobs:
           sudo ninja -C build
           sudo ninja -C build install
           echo "Ninja build done"
+          
+          # Create pkg-config wrapper
           sudo tee /usr/local/bin/aarch64-linux-musl-pkg-config > /dev/null <<'EOF'
           #!/bin/sh
           exec pkg-config "$@"
           EOF
           sudo chmod +x /usr/local/bin/aarch64-linux-musl-pkg-config
-          head -n 5 /usr/local/bin/aarch64-linux-musl-pkg-config
-          ls -l /usr/local/bin/aarch64-linux-musl-pkg-config
-          /usr/local/bin/aarch64-linux-musl-pkg-config --version
+          
+          # Add musl target
           rustup target add aarch64-unknown-linux-musl
+          
+          # Create a simple Zig wrapper that works better with Ring
+          sudo tee /usr/local/bin/aarch64-linux-musl-gcc > /dev/null <<'EOF'
+          #!/bin/sh
+          exec zig cc -target aarch64-linux-musl "$@"
+          EOF
+          sudo chmod +x /usr/local/bin/aarch64-linux-musl-gcc
           
       - name: Setup > x86_64-pc-windows-msvc
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
@@ -307,10 +316,8 @@ jobs:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
           PKG_CONFIG_aarch64_unknown_linux_musl: /usr/local/bin/aarch64-linux-musl-pkg-config
-          CC_aarch64_unknown_linux_musl: zig cc -target aarch64-linux-musl
-          CXX_aarch64_unknown_linux_musl: zig c++ -target aarch64-linux-musl
-          AR_aarch64_unknown_linux_musl: zig ar
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: zig
+          CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/local/bin/aarch64-linux-musl-gcc' || '' }}
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/local/bin/aarch64-linux-musl-gcc' || '' }}
 
 
       - name: Upload artifact
