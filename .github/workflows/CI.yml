@@ -71,29 +71,29 @@ jobs:
           #   build: yarn build --target aarch64-pc-windows-msvc
           #   envs: 
           #     - PKG_CONFIG_ALLOW_CROSS=1
-          # - host: ubuntu-latest
-          #   target: x86_64-unknown-linux-gnu
-          #   build: yarn build --target x86_64-unknown-linux-gnu
-          #   envs: 
-          #     - PKG_CONFIG_ALLOW_CROSS=1
-          # - host: ubuntu-latest
-          #   target: x86_64-unknown-linux-musl
-          #   build: yarn build --target x86_64-unknown-linux-musl -x
-          #   envs: 
-          #     - PKG_CONFIG_ALLOW_CROSS=1
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            build: yarn build --target x86_64-unknown-linux-gnu
+            envs: 
+              - PKG_CONFIG_ALLOW_CROSS=1
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            build: yarn build --target x86_64-unknown-linux-musl -x
+            envs: 
+              - PKG_CONFIG_ALLOW_CROSS=1
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu 
             build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
             envs: 
               - PKG_CONFIG_ALLOW_CROSS=1
-          # - host: ubuntu-latest
-          #   target: armv7-unknown-linux-gnueabihf
-          #   build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
-          #   envs: 
-          #     - PKG_CONFIG_ALLOW_CROSS=1
-          # - host: ubuntu-latest
-          #   target: aarch64-linux-android
-          #   build: yarn build --target aarch64-linux-android
+          - host: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
+            envs: 
+              - PKG_CONFIG_ALLOW_CROSS=1
+          - host: ubuntu-latest
+            target: aarch64-linux-android
+            build: yarn build --target aarch64-linux-android
           # - host: ubuntu-latest
           #   target: aarch64-unknown-linux-musl
           #   build: yarn build --target aarch64-unknown-linux-musl -x
@@ -181,7 +181,29 @@ jobs:
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         run: |
           vcpkg install dav1d:arm64-linux --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community
-
+          
+      - name: Install cross-compilation toolchain (armv7)
+        if: ${{ contains(matrix.settings.target, 'armv7') }}
+        run: |
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          # Create vcpkg triplet file for arm-linux if it doesn't exist
+          mkdir -p ${{ github.workspace }}/vcpkg/triplets/community
+          if [ ! -f "${{ github.workspace }}/vcpkg/triplets/community/arm-linux.cmake" ]; then
+            cat > ${{ github.workspace }}/vcpkg/triplets/community/arm-linux.cmake << 'EOF'
+          set(VCPKG_TARGET_ARCHITECTURE arm)
+          set(VCPKG_CRT_LINKAGE dynamic)
+          set(VCPKG_LIBRARY_LINKAGE static)
+          set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+          set(VCPKG_CMAKE_SYSTEM_PROCESSOR arm)
+          set(VCPKG_CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+          set(VCPKG_CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+          EOF
+          fi
+          
+      - name: Install vcpkg dependencies (armv7-unknown-linux-gnueabihf)
+        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
+        run: |
+          vcpkg install dav1d:arm-linux --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community
       - name: Setup windows dependencies (x86_64-pc-windows-msvc)
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
         run: |
@@ -212,6 +234,10 @@ jobs:
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'aarch64-pc-windows-msvc'}}
         run: |
           echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+      - name: Set PKG_CONFIG_PATH (x86_64-unknown-linux-gnu)
+        if: ${{ matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
+        run: |
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-linux/lib/pkgconfig" >> $GITHUB_ENV
           
       - name: Setup cross-compilation environment (aarch64-unknown-linux-gnu)
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
@@ -221,6 +247,44 @@ jobs:
           echo "AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar" >> $GITHUB_ENV
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm64-linux/lib/pkgconfig" >> $GITHUB_ENV
+          
+      - name: Setup cross-compilation environment (armv7-unknown-linux-gnueabihf)
+        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
+        run: |
+          echo "CC_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+          echo "CXX_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++" >> $GITHUB_ENV
+          echo "AR_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-ar" >> $GITHUB_ENV
+          echo "CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm-linux/lib/pkgconfig" >> $GITHUB_ENV
+          
+      - name: Install vcpkg dependencies (aarch64-unknown-linux-musl)
+        if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
+        run: |
+          # For musl targets, we'll rely on static linking with zig
+          echo "Using static linking with zig for musl target"
+          
+      - name: Setup Android dependencies
+        if: ${{ matrix.settings.target == 'aarch64-linux-android' }}
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          
+      - name: Install vcpkg dependencies (aarch64-linux-android)
+        if: ${{ matrix.settings.target == 'aarch64-linux-android' }}
+        run: |
+          vcpkg install dav1d:arm64-android || echo "Using system libraries for Android"
+          
+      - name: Setup Android NDK (aarch64-linux-android)
+        if: ${{ matrix.settings.target == 'aarch64-linux-android' }}
+        run: |
+          echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
+          echo "CC_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
+          echo "CXX_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++" >> $GITHUB_ENV
+          echo "AR_aarch64_linux_android=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" >> $GITHUB_ENV
+          echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang" >> $GITHUB_ENV
+          if [ -d "${{ github.workspace }}/vcpkg/installed/arm64-android" ]; then
+            echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm64-android/lib/pkgconfig" >> $GITHUB_ENV
+          fi
           
       - name: Install dependencies
         run: yarn install
