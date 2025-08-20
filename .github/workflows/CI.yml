@@ -48,13 +48,13 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            build: yarn build --target x86_64-apple-darwin
+          # - host: macos-latest
+          #   target: x86_64-apple-darwin
+          #   build: yarn build --target x86_64-apple-darwin
 
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: yarn build --target aarch64-apple-darwin
+          # - host: macos-latest
+          #   target: aarch64-apple-darwin
+          #   build: yarn build --target aarch64-apple-darwin
 
           # - host: windows-latest
           #   build: yarn build --target x86_64-pc-windows-msvc
@@ -304,8 +304,11 @@ jobs:
           CARGO_FEATURE_VCPKG: 1
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
-
           PKG_CONFIG_aarch64_unknown_linux_musl: /usr/local/bin/aarch64-linux-musl-pkg-config
+          CC_aarch64_unknown_linux_musl: zig cc -target aarch64-linux-musl
+          CXX_aarch64_unknown_linux_musl: zig c++ -target aarch64-linux-musl
+          AR_aarch64_unknown_linux_musl: zig ar
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: zig
 
 
       - name: Upload artifact
