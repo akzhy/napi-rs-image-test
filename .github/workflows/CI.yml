@@ -230,27 +230,54 @@ jobs:
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config
+          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config \
+            gcc-aarch64-linux-gnu libc6-dev-arm64-cross
           
-          # Install musl cross-compiler from Alpine's musl-cross repository
-          wget https://musl.cc/aarch64-linux-musl-cross.tgz
-          tar -xzf aarch64-linux-musl-cross.tgz
-          sudo mv aarch64-linux-musl-cross /opt/
-          export PATH="/opt/aarch64-linux-musl-cross/bin:$PATH"
-          echo "/opt/aarch64-linux-musl-cross/bin" >> $GITHUB_PATH
+          # Create meson cross-compilation file for aarch64
+          sudo tee /tmp/aarch64-cross.txt > /dev/null <<'EOF'
+          [binaries]
+          c = 'aarch64-linux-gnu-gcc'
+          cpp = 'aarch64-linux-gnu-g++'
+          ar = 'aarch64-linux-gnu-ar'
+          strip = 'aarch64-linux-gnu-strip'
+          pkgconfig = 'pkg-config'
+
+          [host_machine]
+          system = 'linux'
+          cpu_family = 'aarch64'
+          cpu = 'aarch64'
+          endian = 'little'
+          EOF
           
-          # Build dav1d for aarch64-musl
-          git clone https://code.videolan.org/videolan/dav1d.git
+          # Build dav1d for both x86_64 and aarch64
+          git clone --depth 1 https://code.videolan.org/videolan/dav1d.git
           cd dav1d
-          meson setup build --default-library=static --prefix=/usr --libdir=lib
-          echo "About to start ninja build"
-          sudo ninja -C build
-          sudo ninja -C build install
-          echo "Ninja build done"
           
-          # Create pkg-config wrapper
+          # Build for x86_64 first (for host system)
+          meson setup build-x86_64 --default-library=static --prefix=/usr --libdir=lib
+          sudo ninja -C build-x86_64
+          sudo ninja -C build-x86_64 install
+          
+          # Build for aarch64 with cross-compilation
+          meson setup build-aarch64 --default-library=static --prefix=/usr/aarch64-linux-gnu --libdir=lib \
+              --cross-file=/tmp/aarch64-cross.txt
+          sudo ninja -C build-aarch64
+          sudo ninja -C build-aarch64 install
+          
+          cd ..
+          rm -rf dav1d
+          
+          # Create pkg-config wrappers for musl (both x86_64 and aarch64)
+          sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null <<'EOF'
+          #!/bin/sh
+          exec pkg-config "$@"
+          EOF
+          sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
+          
           sudo tee /usr/local/bin/aarch64-linux-musl-pkg-config > /dev/null <<'EOF'
           #!/bin/sh
+          export PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig
+          export PKG_CONFIG_LIBDIR=/usr/aarch64-linux-gnu/lib/pkgconfig
           exec pkg-config "$@"
           EOF
           sudo chmod +x /usr/local/bin/aarch64-linux-musl-pkg-config
@@ -316,8 +343,13 @@ jobs:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
           PKG_CONFIG_aarch64_unknown_linux_musl: /usr/local/bin/aarch64-linux-musl-pkg-config
-          CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-musl-gcc' || '' }}
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-musl-gcc' || '' }}
+          CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-gcc' || '' }}
+          CXX_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-g++' || '' }}
+          AR_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-ar' || '' }}
+          STRIP_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-strip' || '' }}
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-gcc' || '' }}
+          PKG_CONFIG_PATH_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/aarch64-linux-gnu/lib/pkgconfig' || '' }}
+          PKG_CONFIG_LIBDIR_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/aarch64-linux-gnu/lib/pkgconfig' || '' }}
 
 
       - name: Upload artifact
