@@ -90,7 +90,7 @@ jobs:
 
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            build: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=zig yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -230,7 +230,14 @@ jobs:
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config gcc-aarch64-linux-gnu
+          sudo apt-get install -y musl-tools nasm meson ninja-build build-essential pkg-config
+          
+          # Install musl cross-compiler from Alpine's musl-cross repository
+          wget https://musl.cc/aarch64-linux-musl-cross.tgz
+          tar -xzf aarch64-linux-musl-cross.tgz
+          sudo mv aarch64-linux-musl-cross /opt/
+          export PATH="/opt/aarch64-linux-musl-cross/bin:$PATH"
+          echo "/opt/aarch64-linux-musl-cross/bin" >> $GITHUB_PATH
           
           # Build dav1d for aarch64-musl
           git clone https://code.videolan.org/videolan/dav1d.git
@@ -250,13 +257,6 @@ jobs:
           
           # Add musl target
           rustup target add aarch64-unknown-linux-musl
-          
-          # Create a simple Zig wrapper that works better with Ring
-          sudo tee /usr/local/bin/aarch64-linux-musl-gcc > /dev/null <<'EOF'
-          #!/bin/sh
-          exec zig cc -target aarch64-linux-musl "$@"
-          EOF
-          sudo chmod +x /usr/local/bin/aarch64-linux-musl-gcc
           
       - name: Setup > x86_64-pc-windows-msvc
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
@@ -316,8 +316,8 @@ jobs:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
           PKG_CONFIG_aarch64_unknown_linux_musl: /usr/local/bin/aarch64-linux-musl-pkg-config
-          CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/local/bin/aarch64-linux-musl-gcc' || '' }}
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && '/usr/local/bin/aarch64-linux-musl-gcc' || '' }}
+          CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-musl-gcc' || '' }}
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-musl-gcc' || '' }}
 
 
       - name: Upload artifact
