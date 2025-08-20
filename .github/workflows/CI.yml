@@ -149,7 +149,7 @@ jobs:
         run: |
           brew install pkgconf dav1d 
       - name: Setup linux dependencies (aarch64-unknown-linux-gnu)
-        if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+        if: ${{ matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         run: |
           sudo dpkg --add-architecture arm64
           sudo apt-get update
