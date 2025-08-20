@@ -1,8 +1,10 @@
 import test from 'ava'
+import path from 'path'
 
-import { plus100 } from '../index'
+import { imageDimensions } from '../index'
 
 test('sync function from native code', (t) => {
-  const fixture = 42
-  t.is(plus100(fixture), fixture + 100)
+  const image = path.join(process.cwd(), '__test__', 'image.avif');
+  console.log(image);
+  t.deepEqual(imageDimensions(image), [800, 800])
 })

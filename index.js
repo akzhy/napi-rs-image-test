@@ -393,4 +393,5 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.getRemoteImageDimensionsResult = nativeBinding.getRemoteImageDimensionsResult
 module.exports.imageDimensions = nativeBinding.imageDimensions
