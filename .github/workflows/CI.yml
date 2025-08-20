@@ -226,12 +226,6 @@ jobs:
           echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
       - name: Install dependencies
         run: yarn install
-      - name: Debug pkg-config
-        run: |
-          which pkg-config
-          which x86_64-linux-musl-pkg-config
-          echo $PATH
-          /usr/local/bin/x86_64-linux-musl-pkg-config --libs dav1d
       - name: Build
         run: ${{ matrix.settings.build }}
         shell: bash
