@@ -254,21 +254,21 @@ jobs:
           choco install pkgconfiglite
           vcpkg install dav1d
           echo "${{ github.workspace }}/vcpkg"
-          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/x64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_x64-windows/lib/pkgconfig;VCPKG_ROOT\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-windows/lib/pkgconfig;${{ github.workspace }}/vcpkg/packages/dav1d_x64-windows/lib/pkgconfig;VCPKG_ROOT\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
 
       - name: Setup > i686-pc-windows-msvc
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'i686-pc-windows-msvc' }}
         run: |
           choco install pkgconfiglite
           vcpkg install dav1d:x86-windows-static
-          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/x86-windows-static/lib/pkgconfig;C:/vcpkg/packages/dav1d_x86-windows-static/lib/pkgconfig;VCPKG_ROOT\installed\x86-windows-static\lib\pkgconfig" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x86-windows-static/lib/pkgconfig;${{ github.workspace }}/vcpkg/packages/dav1d_x86-windows-static/lib/pkgconfig;VCPKG_ROOT\installed\x86-windows-static\lib\pkgconfig" >> $env:GITHUB_ENV
 
       - name: Setup > aarch64-pc-windows-msvc
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'aarch64-pc-windows-msvc' }}
         run: |
           choco install pkgconfiglite
           vcpkg install dav1d:arm64-windows
-          echo "PKG_CONFIG_PATH=C:/vcpkg/installed/aarch64-windows/lib/pkgconfig;C:/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/aarch64-windows/lib/pkgconfig;${{ github.workspace }}/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
          
           
           
