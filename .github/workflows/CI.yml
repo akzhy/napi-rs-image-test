@@ -81,7 +81,7 @@ jobs:
             build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
             envs: 
               - PKG_CONFIG_ALLOW_CROSS=1
-          - host: ubuntu-22.04
+          - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu 
             build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
             envs: 
@@ -149,19 +149,24 @@ jobs:
         run: |
           brew install pkgconf dav1d 
       - name: Setup linux dependencies (aarch64-unknown-linux-gnu)
-        if: ${{ matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+        if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         run: |
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y crossbuild-essential-arm64 pkg-config libdav1d-dev:arm64 gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          sudo tee /usr/local/bin/aarch64-linux-gnu-pkg-config > /dev/null <<'EOF'
-          #!/bin/sh
-          exec pkg-config "$@"
-          EOF
-          sudo chmod +x /usr/local/bin/aarch64-linux-gnu-pkg-config
-          head -n 5 /usr/local/bin/aarch64-linux-gnu-pkg-config
-          ls -l /usr/local/bin/aarch64-linux-gnu-pkg-config
-          /usr/local/bin/aarch64-linux-gnu-pkg-config --version
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          # Create vcpkg triplet file for aarch64-linux if it doesn't exist
+          mkdir -p ${{ github.workspace }}/vcpkg/triplets/community
+          if [ ! -f "${{ github.workspace }}/vcpkg/triplets/community/arm64-linux.cmake" ]; then
+            cat > ${{ github.workspace }}/vcpkg/triplets/community/arm64-linux.cmake << 'EOF'
+            set(VCPKG_TARGET_ARCHITECTURE arm64)
+            set(VCPKG_CRT_LINKAGE dynamic)
+            set(VCPKG_LIBRARY_LINKAGE static)
+            set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+            set(VCPKG_CMAKE_SYSTEM_PROCESSOR aarch64)
+            set(VCPKG_CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
+            set(VCPKG_CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+            EOF
+          fi
+          vcpkg install dav1d:arm64-linux --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm64-linux/lib/pkgconfig" >> $GITHUB_ENV
       - name: Setup linux dependencies (x86_64-unknown-linux-musl)
         if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'x86_64-unknown-linux-musl' }}
         run: |
@@ -236,7 +241,6 @@ jobs:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
           PKG_CONFIG_PATH: /usr/lib/pkgconfig:/usr/local/lib/pkgconfig
-          PKG_CONFIG_aarch64_unknown_linux_gnu: /usr/local/bin/aarch64-linux-gnu-pkg-config
 
 
       - name: Upload artifact
