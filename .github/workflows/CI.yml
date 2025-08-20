@@ -48,25 +48,25 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          # - host: macos-latest
-          #   target: x86_64-apple-darwin
-          #   build: yarn build --target x86_64-apple-darwin
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            build: yarn build --target x86_64-apple-darwin
 
-          # - host: macos-latest
-          #   target: aarch64-apple-darwin
-          #   build: yarn build --target aarch64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: yarn build --target aarch64-apple-darwin
 
-          - host: windows-latest
-            build: yarn build --target x86_64-pc-windows-msvc
-            target: x86_64-pc-windows-msvc
+          # - host: windows-latest
+          #   build: yarn build --target x86_64-pc-windows-msvc
+          #   target: x86_64-pc-windows-msvc
 
-          - host: windows-latest
-            build: yarn build --target i686-pc-windows-msvc
-            target: i686-pc-windows-msvc
+          # - host: windows-latest
+          #   build: yarn build --target i686-pc-windows-msvc
+          #   target: i686-pc-windows-msvc
 
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: yarn build --target aarch64-pc-windows-msvc
+          # - host: windows-latest
+          #   target: aarch64-pc-windows-msvc
+          #   build: yarn build --target aarch64-pc-windows-msvc
 
           # - host: ubuntu-latest
           #   target: x86_64-unknown-linux-gnu
@@ -227,7 +227,7 @@ jobs:
           /usr/local/bin/x86_64-linux-musl-pkg-config --version
 
       - name: Setup > aarch64-unknown-linux-musl
-        if: ${{ matrix.settings.host == 'ubuntu-latest' && matrix.settings.target == 'aarch64-unknown-linux-musl' }}
+        if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
         run: |
           # No native musl cross toolchain in Ubuntu repos; use Zig/cargo-zigbuild for cross-compiling
           sudo apt-get update
@@ -247,6 +247,7 @@ jobs:
           head -n 5 /usr/local/bin/aarch64-linux-musl-pkg-config
           ls -l /usr/local/bin/aarch64-linux-musl-pkg-config
           /usr/local/bin/aarch64-linux-musl-pkg-config --version
+          rustup target add aarch64-unknown-linux-musl
           
       - name: Setup > x86_64-pc-windows-msvc
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'x86_64-pc-windows-msvc' }}
