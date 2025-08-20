@@ -156,14 +156,14 @@ jobs:
           mkdir -p ${{ github.workspace }}/vcpkg/triplets/community
           if [ ! -f "${{ github.workspace }}/vcpkg/triplets/community/arm64-linux.cmake" ]; then
             cat > ${{ github.workspace }}/vcpkg/triplets/community/arm64-linux.cmake << 'EOF'
-            set(VCPKG_TARGET_ARCHITECTURE arm64)
-            set(VCPKG_CRT_LINKAGE dynamic)
-            set(VCPKG_LIBRARY_LINKAGE static)
-            set(VCPKG_CMAKE_SYSTEM_NAME Linux)
-            set(VCPKG_CMAKE_SYSTEM_PROCESSOR aarch64)
-            set(VCPKG_CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
-            set(VCPKG_CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
-            EOF
+          set(VCPKG_TARGET_ARCHITECTURE arm64)
+          set(VCPKG_CRT_LINKAGE dynamic)
+          set(VCPKG_LIBRARY_LINKAGE static)
+          set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+          set(VCPKG_CMAKE_SYSTEM_PROCESSOR aarch64)
+          set(VCPKG_CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
+          set(VCPKG_CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+          EOF
           fi
           vcpkg install dav1d:arm64-linux --overlay-triplets=${{ github.workspace }}/vcpkg/triplets/community
           echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/arm64-linux/lib/pkgconfig" >> $GITHUB_ENV
