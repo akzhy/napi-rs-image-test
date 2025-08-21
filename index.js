@@ -65,7 +65,6 @@ const isMuslFromChildProcess = () => {
 
 function requireNative() {
   console.log("Require config: ", process.platform, process.arch, process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
-
   if (process.env.NAPI_RS_NATIVE_LIBRARY_PATH) {
     try {
       nativeBinding = require(process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
@@ -106,9 +105,17 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
+        console.log("Trying to load napi-rs-image-test-win32-x64-msvc");
         return require('napi-rs-image-test-win32-x64-msvc')
       } catch (e) {
-        loadErrors.push(e)
+        console.log("Failed to load napi-rs-image-test-win32-x64-msvc");
+        try {
+          console.log("Trying to load napi-rs-image-test-win32-x64-msvc.node");
+          return require('./napi-rs-image-test.win32-x64-msvc.node')
+        } catch (e) {
+          console.log("Failed to load napi-rs-image-test-win32-x64-msvc.node");
+          loadErrors.push(e)
+        }
       }
     } else if (process.arch === 'ia32') {
       try {

@@ -48,13 +48,13 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            build: yarn build --target x86_64-apple-darwin
+          # - host: macos-latest
+          #   target: x86_64-apple-darwin
+          #   build: yarn build --target x86_64-apple-darwin
 
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: yarn build --target aarch64-apple-darwin
+          # - host: macos-latest
+          #   target: aarch64-apple-darwin
+          #   build: yarn build --target aarch64-apple-darwin
 
           - host: windows-latest
             build: yarn build --target x86_64-pc-windows-msvc
@@ -68,29 +68,29 @@ jobs:
             target: aarch64-pc-windows-msvc
             build: yarn build --target aarch64-pc-windows-msvc
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            build: yarn build --target x86_64-unknown-linux-gnu
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-gnu
+          #   build: yarn build --target x86_64-unknown-linux-gnu
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu 
-            build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu 
+          #   build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
-          - host: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: armv7-unknown-linux-gnueabihf
+          #   build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
 
-          - host: ubuntu-latest
-            target: aarch64-linux-android
-            build: yarn build --target aarch64-linux-android
+          # - host: ubuntu-latest
+          #   target: aarch64-linux-android
+          #   build: yarn build --target aarch64-linux-android
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
