@@ -88,9 +88,9 @@ jobs:
             target: aarch64-linux-android
             build: yarn build --target aarch64-linux-android
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -507,6 +507,9 @@ jobs:
       - name: List packages
         run: ls -R .
         shell: bash
+      - name: Check linking
+        run: ldd napi-rs-image-test.linux-x64-musl.node
+        if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: ${{ contains(matrix.target, 'armv7') }}
