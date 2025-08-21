@@ -447,11 +447,6 @@ jobs:
       - name: List packages
         run: ls -R .
         shell: bash
-      - name: Inspect dependencies
-        run: |
-          rustup component add llvm-tools-preview
-          cargo install cargo-binutils
-          llvm-objdump -p napi-rs-image-test.win32-x64-msvc.node | Select-String "DLL Name"
 
       - name: Test bindings
         run: yarn test
