@@ -140,7 +140,7 @@ jobs:
       - name: Setup mac OS dependencies
         if: ${{ matrix.settings.host == 'macos-latest' }}
         run: |
-          brew install pkgconf
+          brew install pkgconf nasm
       - name: Setup > x86_64-apple-darwin
         if: ${{ matrix.settings.target == 'x86_64-apple-darwin' }}
         run: |
