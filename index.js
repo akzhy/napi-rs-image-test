@@ -106,14 +106,21 @@ function requireNative() {
       }
       try {
         console.log("Trying to load napi-rs-image-test-win32-x64-msvc");
+        fs.readdir(".", (err, files) => {
+          if (err) {
+            console.error("Error reading directory:", err);
+            return;
+          }
+          console.log("Files in directory:", files);
+        });
         return require('napi-rs-image-test-win32-x64-msvc')
       } catch (e) {
-        console.log("Failed to load napi-rs-image-test-win32-x64-msvc");
+        console.log("Failed to load napi-rs-image-test-win32-x64-msvc", e);
         try {
-          console.log("Trying to load napi-rs-image-test-win32-x64-msvc.node");
+          console.log("Trying to load ./napi-rs-image-test-win32-x64-msvc.node");
           return require('./napi-rs-image-test.win32-x64-msvc.node')
         } catch (e) {
-          console.log("Failed to load napi-rs-image-test-win32-x64-msvc.node");
+          console.log("Failed to load napi-rs-image-test-win32-x64-msvc.node", e);
           loadErrors.push(e)
         }
       }
