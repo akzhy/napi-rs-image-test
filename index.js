@@ -64,6 +64,8 @@ const isMuslFromChildProcess = () => {
 }
 
 function requireNative() {
+  console.log("Require config: ", process.platform, process.arch, process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
+
   if (process.env.NAPI_RS_NATIVE_LIBRARY_PATH) {
     try {
       nativeBinding = require(process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
