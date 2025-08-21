@@ -452,7 +452,7 @@ jobs:
         run: |
           rustup component add llvm-tools-preview
           cargo install cargo-binutils
-          llvm-objdump -p target/x86_64-pc-windows-msvc/release/napi-rs-image-test.win32-x64-msvc.node | Select-String "DLL Name"
+          llvm-objdump -p napi-rs-image-test.win32-x64-msvc.node | Select-String "DLL Name"
 
       - name: Test bindings
         run: yarn test
