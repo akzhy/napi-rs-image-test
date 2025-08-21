@@ -448,6 +448,8 @@ jobs:
       - name: List packages
         run: ls -R .
         shell: bash
+      - name: Inspect dependencies
+        run: dumpbin /dependents napi-rs-image-test.win32-x64-msvc.node
       - name: Test bindings
         run: yarn test
         working-directory: .
