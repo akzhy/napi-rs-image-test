@@ -3,6 +3,8 @@ import path from 'path'
 
 import { imageDimensions } from '../index'
 
+console.log(process.cwd())
+
 test('sync function from native code', (t) => {
   const image = path.join(process.cwd(), '__test__', 'image.avif');
   console.log(image);

@@ -469,9 +469,6 @@ jobs:
     runs-on: ${{ contains(matrix.target, 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5
-      - name: Clear yarn lock
-        run: |
-          rm -f yarn.lock
       - name: Setup node
         uses: actions/setup-node@v4
         with:
