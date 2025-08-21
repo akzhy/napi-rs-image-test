@@ -224,7 +224,7 @@ jobs:
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
           CC=musl-gcc meson setup builddir --default-library=static --prefix=/usr/local/musl --libdir=lib
-          sudo ninja -c builddir install
+          sudo ninja -C builddir install
           echo "PKG_CONFIG_PATH=/usr/local/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
 
       - name: Setup > aarch64-unknown-linux-musl
