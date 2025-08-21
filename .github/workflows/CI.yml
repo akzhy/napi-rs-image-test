@@ -48,49 +48,49 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          # - host: macos-latest
-          #   target: x86_64-apple-darwin
-          #   build: yarn build --target x86_64-apple-darwin
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            build: yarn build --target x86_64-apple-darwin
 
-          # - host: macos-latest
-          #   target: aarch64-apple-darwin
-          #   build: yarn build --target aarch64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: yarn build --target aarch64-apple-darwin
 
           - host: windows-latest
             build: yarn build --target x86_64-pc-windows-msvc
             target: x86_64-pc-windows-msvc
 
-          # - host: windows-latest
-          #   build: yarn build --target i686-pc-windows-msvc
-          #   target: i686-pc-windows-msvc
+          - host: windows-latest
+            build: yarn build --target i686-pc-windows-msvc
+            target: i686-pc-windows-msvc
 
-          # - host: windows-latest
-          #   target: aarch64-pc-windows-msvc
-          #   build: yarn build --target aarch64-pc-windows-msvc
+          - host: windows-latest
+            target: aarch64-pc-windows-msvc
+            build: yarn build --target aarch64-pc-windows-msvc
 
-          # - host: ubuntu-latest
-          #   target: x86_64-unknown-linux-gnu
-          #   build: yarn build --target x86_64-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            build: yarn build --target x86_64-unknown-linux-gnu
 
-          # - host: ubuntu-latest
-          #   target: x86_64-unknown-linux-musl
-          #   build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
 
-          # - host: ubuntu-latest
-          #   target: aarch64-unknown-linux-gnu 
-          #   build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-gnu 
+            build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
-          # - host: ubuntu-latest
-          #   target: armv7-unknown-linux-gnueabihf
-          #   build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
+          - host: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
 
-          # - host: ubuntu-latest
-          #   target: aarch64-linux-android
-          #   build: yarn build --target aarch64-linux-android
+          - host: ubuntu-latest
+            target: aarch64-linux-android
+            build: yarn build --target aarch64-linux-android
 
-          # - host: ubuntu-latest
-          #   target: aarch64-unknown-linux-musl
-          #   build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -304,11 +304,9 @@ jobs:
         if: ${{ matrix.settings.host == 'windows-latest' && matrix.settings.target == 'aarch64-pc-windows-msvc' }}
         run: |
           choco install pkgconfiglite
-          vcpkg install dav1d:arm64-windows
-          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/aarch64-windows/lib/pkgconfig;${{ github.workspace }}/vcpkg/packages/dav1d_arm64-windows/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
-         
-          
-          
+          vcpkg install dav1d:arm64-windows-static
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/aarch64-windows-static/lib/pkgconfig;${{ github.workspace }}/vcpkg/packages/dav1d_arm64-windows-static/lib/pkgconfig;VCPKG_ROOT\installed\aarch64-windows-static\lib\pkgconfig" >> $env:GITHUB_ENV
+
       - name: Setup Android dependencies
         if: ${{ matrix.settings.target == 'aarch64-linux-android' }}
         uses: nttld/setup-ndk@v1
@@ -457,75 +455,75 @@ jobs:
       - name: Test bindings
         run: yarn test
         working-directory: .
-  # test-linux-binding:
-  #   name: Test ${{ matrix.target }} - node@${{ matrix.node }}
-  #   needs:
-  #     - build
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       target:
-  #         - x86_64-unknown-linux-gnu
-  #         - x86_64-unknown-linux-musl
-  #         - aarch64-unknown-linux-gnu
-  #         - aarch64-unknown-linux-musl
-  #         - armv7-unknown-linux-gnueabihf
-  #       node:
-  #         - '20'
-  #         - '22'
-  #   runs-on: ${{ contains(matrix.target, 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-  #   steps:
-  #     - uses: actions/checkout@v5
-  #     - name: Setup node
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #         cache: yarn
-  #     - name: Output docker params
-  #       id: docker
-  #       run: |
-  #         node -e "
-  #           if ('${{ matrix.target }}'.startsWith('aarch64')) {
-  #             console.log('PLATFORM=linux/arm64')
-  #           } else if ('${{ matrix.target }}'.startsWith('armv7')) {
-  #             console.log('PLATFORM=linux/arm/v7')
-  #           } else {
-  #             console.log('PLATFORM=linux/amd64')
-  #           }
-  #         " >> $GITHUB_OUTPUT
-  #         node -e "
-  #           if ('${{ matrix.target }}'.endsWith('-musl')) {
-  #             console.log('IMAGE=node:${{ matrix.node }}-alpine')
-  #           } else {
-  #             console.log('IMAGE=node:${{ matrix.node }}-slim')
-  #           }
-  #         " >> $GITHUB_OUTPUT
-  #     - name: Install dependencies
-  #       run: |
-  #         yarn config set --json supportedArchitectures.cpu '["current", "arm64", "x64", "arm"]'
-  #         yarn config set --json supportedArchitectures.libc '["current", "musl", "gnu"]'
-  #         yarn install
-  #     - name: Download artifacts
-  #       uses: actions/download-artifact@v5
-  #       with:
-  #         name: bindings-${{ matrix.target }}
-  #         path: .
-  #     - name: List packages
-  #       run: ls -R .
-  #       shell: bash
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v3
-  #       if: ${{ contains(matrix.target, 'armv7') }}
-  #       with:
-  #         platforms: all
-  #     - run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  #       if: ${{ contains(matrix.target, 'armv7') }}
-  #     - name: Test bindings
-  #       uses: addnab/docker-run-action@v3
-  #       with:
-  #         image: ${{ steps.docker.outputs.IMAGE }}
-  #         options: '-v ${{ github.workspace }}:${{ github.workspace }} -w ${{ github.workspace }} --platform ${{ steps.docker.outputs.PLATFORM }}'
-  #         run: yarn test
+  test-linux-binding:
+    name: Test ${{ matrix.target }} - node@${{ matrix.node }}
+    needs:
+      - build
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - armv7-unknown-linux-gnueabihf
+        node:
+          - '20'
+          - '22'
+    runs-on: ${{ contains(matrix.target, 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - name: Output docker params
+        id: docker
+        run: |
+          node -e "
+            if ('${{ matrix.target }}'.startsWith('aarch64')) {
+              console.log('PLATFORM=linux/arm64')
+            } else if ('${{ matrix.target }}'.startsWith('armv7')) {
+              console.log('PLATFORM=linux/arm/v7')
+            } else {
+              console.log('PLATFORM=linux/amd64')
+            }
+          " >> $GITHUB_OUTPUT
+          node -e "
+            if ('${{ matrix.target }}'.endsWith('-musl')) {
+              console.log('IMAGE=node:${{ matrix.node }}-alpine')
+            } else {
+              console.log('IMAGE=node:${{ matrix.node }}-slim')
+            }
+          " >> $GITHUB_OUTPUT
+      - name: Install dependencies
+        run: |
+          yarn config set --json supportedArchitectures.cpu '["current", "arm64", "x64", "arm"]'
+          yarn config set --json supportedArchitectures.libc '["current", "musl", "gnu"]'
+          yarn install
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: bindings-${{ matrix.target }}
+          path: .
+      - name: List packages
+        run: ls -R .
+        shell: bash
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        if: ${{ contains(matrix.target, 'armv7') }}
+        with:
+          platforms: all
+      - run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        if: ${{ contains(matrix.target, 'armv7') }}
+      - name: Test bindings
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ steps.docker.outputs.IMAGE }}
+          options: '-v ${{ github.workspace }}:${{ github.workspace }} -w ${{ github.workspace }} --platform ${{ steps.docker.outputs.PLATFORM }}'
+          run: yarn test
   publish:
     name: Publish
     runs-on: ubuntu-latest
@@ -536,7 +534,7 @@ jobs:
       - lint
       # - build-freebsd
       - test-macOS-windows-binding
-      # - test-linux-binding
+      - test-linux-binding
     steps:
       - uses: actions/checkout@v5
       - name: Setup node
