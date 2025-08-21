@@ -230,7 +230,7 @@ jobs:
           echo "Ninja build done"
           sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null <<'EOF'
           #!/bin/sh
-          exec pkg-config "$@"
+          exec pkg-config --static "$@"
           EOF
           sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
           head -n 5 /usr/local/bin/x86_64-linux-musl-pkg-config
