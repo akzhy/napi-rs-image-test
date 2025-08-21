@@ -223,19 +223,9 @@ jobs:
           sudo apt-get install -y nasm meson ninja-build  musl-tools build-essential pkg-config
           git clone https://code.videolan.org/videolan/dav1d.git
           cd dav1d
-          meson setup build --default-library=static --prefix=/usr --libdir=lib
-          echo "About to start ninja build"
-          sudo ninja -C build
-          sudo ninja -C build install
-          echo "Ninja build done"
-          sudo tee /usr/local/bin/x86_64-linux-musl-pkg-config > /dev/null <<'EOF'
-          #!/bin/sh
-          exec pkg-config --static "$@"
-          EOF
-          sudo chmod +x /usr/local/bin/x86_64-linux-musl-pkg-config
-          head -n 5 /usr/local/bin/x86_64-linux-musl-pkg-config
-          ls -l /usr/local/bin/x86_64-linux-musl-pkg-config
-          /usr/local/bin/x86_64-linux-musl-pkg-config --version
+          CC=musl-gcc meson setup builddir --default-library=static --prefix=/usr/local/musl --libdir=lib
+          sudo ninja -c builddir install
+          echo "PKG_CONFIG_PATH=/usr/local/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
 
       - name: Setup > aarch64-unknown-linux-musl
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
