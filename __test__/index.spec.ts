@@ -1,12 +1,12 @@
 import test from 'ava'
 import path from 'path'
 
-import { imageDimensions } from '../index'
-
 console.log(process.cwd())
 
-test('sync function from native code', (t) => {
-  const image = path.join(process.cwd(), '__test__', 'image.avif');
-  console.log(image);
+test('sync function from native code', async (t) => {
+  console.log(process.cwd())
+  const { imageDimensions } = await import('../index.js')
+  const image = path.join(process.cwd(), '__test__', 'image.avif')
+  console.log(image)
   t.deepEqual(imageDimensions(image), [800, 800])
 })
