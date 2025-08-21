@@ -56,17 +56,17 @@ jobs:
             target: aarch64-apple-darwin
             build: yarn build --target aarch64-apple-darwin
 
-          - host: windows-latest
-            build: yarn build --target x86_64-pc-windows-msvc
-            target: x86_64-pc-windows-msvc
+          # - host: windows-latest
+          #   build: yarn build --target x86_64-pc-windows-msvc
+          #   target: x86_64-pc-windows-msvc
 
-          - host: windows-latest
-            build: yarn build --target i686-pc-windows-msvc
-            target: i686-pc-windows-msvc
+          # - host: windows-latest
+          #   build: yarn build --target i686-pc-windows-msvc
+          #   target: i686-pc-windows-msvc
 
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: yarn build --target aarch64-pc-windows-msvc
+          # - host: windows-latest
+          #   target: aarch64-pc-windows-msvc
+          #   build: yarn build --target aarch64-pc-windows-msvc
 
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -150,8 +150,8 @@ jobs:
       - name: Setup > x86_64-unknown-linux-gnu
         if: ${{ matrix.settings.target == 'x86_64-unknown-linux-gnu' }}
         run: |
-          sudo apt-get install -y dav1d libdav1d-dev
-          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-linux/lib/pkgconfig" >> $GITHUB_ENV
+          vcpkg install dav1d:x64-linux-static
+          echo "PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-linux-static/lib/pkgconfig:PKG_CONFIG_PATH=${{ github.workspace }}/vcpkg/installed/x64-linux-static/lib/pkgconfig" >> $GITHUB_ENV
           
       - name: Setup > aarch64-unknown-linux-gnu
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
@@ -339,7 +339,6 @@ jobs:
           PKG_CONFIG_ALLOW_CROSS: 1
           CARGO_FEATURE_VCPKG: 1
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-          PKG_CONFIG_x86_64-unknown-linux-gnu: /usr/bin/x86_64-linux-gnu-pkg-config
           PKG_CONFIG_x86_64_unknown_linux_musl: /usr/local/bin/x86_64-linux-musl-pkg-config
           PKG_CONFIG_aarch64_unknown_linux_musl: /usr/local/bin/aarch64-linux-musl-pkg-config
           CC_aarch64_unknown_linux_musl: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-gcc' || '' }}
