@@ -214,14 +214,18 @@ function requireNative() {
   } else if (process.platform === 'linux') {
     if (process.arch === 'x64') {
       if (isMusl()) {
+        console.log("Its musl");
         try {
           return require('./napi-rs-image-test.linux-x64-musl.node')
         } catch (e) {
+          console.log("Failed to load napi-rs-image-test.linux-x64-musl.node", e);
           loadErrors.push(e)
         }
         try {
+          console.log("Trying to load napi-rs-image-test-linux-x64-musl");
           return require('napi-rs-image-test-linux-x64-musl')
         } catch (e) {
+          console.log("Failed to load napi-rs-image-test-linux-x64-musl", e);
           loadErrors.push(e)
         }
       } else {
