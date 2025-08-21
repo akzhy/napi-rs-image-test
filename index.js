@@ -6,7 +6,7 @@
 const { createRequire } = require('node:module')
 require = createRequire(__filename)
 
-const { readFileSync } = require('node:fs')
+const { readFileSync, readdir } = require('node:fs')
 let nativeBinding = null
 const loadErrors = []
 
@@ -106,7 +106,7 @@ function requireNative() {
       }
       try {
         console.log("Trying to load napi-rs-image-test-win32-x64-msvc");
-        fs.readdir(".", (err, files) => {
+        readdir(".", (err, files) => {
           if (err) {
             console.error("Error reading directory:", err);
             return;
