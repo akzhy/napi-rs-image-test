@@ -227,6 +227,11 @@ jobs:
           sudo ninja -C builddir install
           echo "PKG_CONFIG_PATH=/usr/local/musl/lib/pkgconfig" >> $GITHUB_ENV
           echo "PKG_CONFIG_SYSROOT_DIR=/usr/local/musl" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH_x86_64_unknown_linux_musl=/usr/local/musl/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_LIBDIR_x86_64_unknown_linux_musl=/usr/local/musl/lib/pkgconfig" >> $GITHUB_ENV
+          echo "CC_x86_64_unknown_linux_musl=musl-gcc" >> $GITHUB_ENV
+          echo "AR_x86_64_unknown_linux_musl=ar" >> $GITHUB_ENV
+          echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc" >> $GITHUB_ENV
 
       - name: Setup > aarch64-unknown-linux-musl
         if: ${{ matrix.settings.target == 'aarch64-unknown-linux-musl' }}
