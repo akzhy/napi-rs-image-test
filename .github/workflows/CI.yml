@@ -37,6 +37,8 @@ jobs:
           components: clippy, rustfmt
       - name: Install dependencies
         run: yarn install
+      - name: Setup
+        run: sudo apt-get install -y nasm 
       - name: Oxlint
         run: yarn lint
       - name: Cargo fmt
@@ -56,13 +58,17 @@ jobs:
             target: aarch64-apple-darwin
             build: yarn build --target aarch64-apple-darwin
 
-          - host: windows-latest
-            build: yarn build --target x86_64-pc-windows-msvc
-            target: x86_64-pc-windows-msvc
+          # - host: windows-latest
+          #   build: yarn build --target x86_64-pc-windows-msvc
+          #   target: x86_64-pc-windows-msvc
+
+          # - host: windows-latest
+          #   build: yarn build --target i686-pc-windows-msvc
+          #   target: i686-pc-windows-msvc
 
           - host: windows-latest
-            build: yarn build --target i686-pc-windows-msvc
-            target: i686-pc-windows-msvc
+            target: aarch64-pc-windows-msvc
+            build: yarn build --target aarch64-pc-windows-msvc
 
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -72,9 +78,9 @@ jobs:
             target: x86_64-unknown-linux-musl
             build: yarn build --target x86_64-unknown-linux-musl -x
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu
+          #   build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
           - host: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
@@ -90,11 +96,7 @@ jobs:
 
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl -x
-
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: yarn build --target aarch64-pc-windows-msvc
+            build: yarn build --target aarch64-unknown-linux-musl -x 
 
 
     name: stable - ${{ matrix.settings.target }} - node@22
@@ -146,7 +148,7 @@ jobs:
 
       - name: Setup Windows
         run: |
-          choco install nasm
+          choco install yasm
         if: ${{ matrix.settings.host == 'windows-latest' }}
 
       - name: Setup linux
@@ -154,6 +156,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nasm
         if: ${{ matrix.settings.host == 'ubuntu-latest' }}
+
+      - name: Setup armv7-unknown-linux-gnueabihf
+        run: |
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
 
       - name: Install dependencies
         run: yarn install
@@ -188,7 +195,7 @@ jobs:
           environment_variables: DEBUG RUSTUP_IO_THREADS
           shell: bash
           run: |
-            sudo pkg install -y -f curl node libnghttp2 npm cmake
+            sudo pkg install -y -f curl node libnghttp2 npm cmake yasm
             sudo npm install -g yarn --ignore-scripts
             curl https://sh.rustup.rs -sSf --output rustup.sh
             sh rustup.sh -y --profile minimal --default-toolchain stable
