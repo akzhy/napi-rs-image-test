@@ -6,7 +6,7 @@
 const { createRequire } = require('node:module')
 require = createRequire(__filename)
 
-const { readFileSync, readdir } = require('node:fs')
+const { readFileSync } = require('node:fs')
 let nativeBinding = null
 const loadErrors = []
 
@@ -64,7 +64,6 @@ const isMuslFromChildProcess = () => {
 }
 
 function requireNative() {
-  console.log("Require config: ", process.platform, process.arch, process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
   if (process.env.NAPI_RS_NATIVE_LIBRARY_PATH) {
     try {
       nativeBinding = require(process.env.NAPI_RS_NATIVE_LIBRARY_PATH);
@@ -105,24 +104,9 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        console.log("Trying to load napi-rs-image-test-win32-x64-msvc");
-        readdir(".", (err, files) => {
-          if (err) {
-            console.error("Error reading directory:", err);
-            return;
-          }
-          console.log("Files in directory:", files);
-        });
         return require('napi-rs-image-test-win32-x64-msvc')
       } catch (e) {
-        console.log("Failed to load napi-rs-image-test-win32-x64-msvc", e);
-        try {
-          console.log("Trying to load ./napi-rs-image-test-win32-x64-msvc.node");
-          return require('./napi-rs-image-test.win32-x64-msvc.node')
-        } catch (e) {
-          console.log("Failed to load napi-rs-image-test-win32-x64-msvc.node", e);
-          loadErrors.push(e)
-        }
+        loadErrors.push(e)
       }
     } else if (process.arch === 'ia32') {
       try {
@@ -214,18 +198,14 @@ function requireNative() {
   } else if (process.platform === 'linux') {
     if (process.arch === 'x64') {
       if (isMusl()) {
-        console.log("Its musl");
         try {
           return require('./napi-rs-image-test.linux-x64-musl.node')
         } catch (e) {
-          console.log("Failed to load napi-rs-image-test.linux-x64-musl.node", e);
           loadErrors.push(e)
         }
         try {
-          console.log("Trying to load napi-rs-image-test-linux-x64-musl");
           return require('napi-rs-image-test-linux-x64-musl')
         } catch (e) {
-          console.log("Failed to load napi-rs-image-test-linux-x64-musl", e);
           loadErrors.push(e)
         }
       } else {

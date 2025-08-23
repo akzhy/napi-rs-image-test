@@ -1,4 +1,5 @@
 #![deny(clippy::all)]
+use avif_decode::{Decoder, Image};
 use image::{GenericImageView, ImageReader};
 use reqwest::get;
 use std::io::Cursor;
@@ -7,6 +8,26 @@ use napi_derive::napi;
 
 #[napi]
 pub fn image_dimensions(path: String) -> napi::Result<(u32, u32)> {
+  if path.ends_with(".avif") {
+    println!("About to process AVIF image");
+    let data = std::fs::read(path)?;
+    let d = Decoder::from_avif(&data).unwrap();
+    let image = d.to_image().unwrap();
+    if let Image::Rgb8(img) = image {
+      return Ok((img.width() as u32, img.height() as u32));
+    } else if let Image::Rgba8(img) = image {
+      return Ok((img.width() as u32, img.height() as u32));
+    } else if let Image::Rgba16(img) = image {
+      return Ok((img.width() as u32, img.height() as u32));
+    } else if let Image::Rgb16(img) = image {
+      return Ok((img.width() as u32, img.height() as u32));
+    } else {
+      return Err(napi::Error::new(
+        napi::Status::GenericFailure,
+        "Unsupported AVIF image format".to_string(),
+      ));
+    }
+  }
   let img =
     image::open(path).map_err(|e| napi::Error::new(napi::Status::GenericFailure, e.to_string()))?;
   Ok(img.dimensions())
