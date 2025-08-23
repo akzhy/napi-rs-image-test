@@ -64,20 +64,16 @@ jobs:
             build: yarn build --target i686-pc-windows-msvc
             target: i686-pc-windows-msvc
 
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: yarn build --target aarch64-pc-windows-msvc
-
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            build: yarn build --target x86_64-unknown-linux-gnu
+            build: yarn build --target x86_64-unknown-linux-gnu --use-napi-cross
 
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            build: yarn build --target x86_64-unknown-linux-musl --use-napi-cross
+            build: yarn build --target x86_64-unknown-linux-musl -x
 
           - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu 
+            target: aarch64-unknown-linux-gnu
             build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
           - host: ubuntu-latest
@@ -89,8 +85,17 @@ jobs:
             build: yarn build --target aarch64-linux-android
 
           - host: ubuntu-latest
+            target: armv7-linux-androideabi
+            build: yarn build --target armv7-linux-androideabi
+
+          - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl --use-napi-cross
+            build: yarn build --target aarch64-unknown-linux-musl -x
+
+          - host: windows-latest
+            target: aarch64-pc-windows-msvc
+            build: yarn build --target aarch64-pc-windows-msvc
+
 
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -133,7 +138,23 @@ jobs:
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
         shell: bash
-          
+
+      - name: Setup macOS
+        run: |
+          brew install nasm
+        if: ${{ matrix.settings.host == 'macos-latest' }}
+
+      - name: Setup Windows
+        run: |
+          choco install nasm
+        if: ${{ matrix.settings.host == 'windows-latest' }}
+
+      - name: Setup linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm
+        if: ${{ matrix.settings.host == 'ubuntu-latest' }}
+
       - name: Install dependencies
         run: yarn install
       - name: Build
