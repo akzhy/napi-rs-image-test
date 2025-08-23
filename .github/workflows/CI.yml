@@ -141,10 +141,10 @@ jobs:
         if: ${{ matrix.settings.setup }}
         shell: bash
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ee0973d8090e4e3e452244bb50d34c25fe907dc2
+      # - name: Setup vcpkg
+      #   uses: lukka/run-vcpkg@v11
+      #   with:
+      #     vcpkgGitCommitId: ee0973d8090e4e3e452244bb50d34c25fe907dc2
 
       - name: Setup macOS
         run: |
@@ -154,7 +154,6 @@ jobs:
       - name: Setup Windows
         run: |
           choco install yasm
-          vcpkg install yasm
           $yasm_path = "C:\ProgramData\chocolatey\bin"
           echo "YASM_PATH=$yasm_path" >> $env:GITHUB_ENV
           echo "PATH=$yasm_path;$env:PATH" >> $env:GITHUB_ENV
