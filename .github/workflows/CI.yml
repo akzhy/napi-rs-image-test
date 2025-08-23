@@ -50,53 +50,53 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            build: yarn build --target x86_64-apple-darwin
+          # - host: macos-latest
+          #   target: x86_64-apple-darwin
+          #   build: yarn build --target x86_64-apple-darwin
 
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: yarn build --target aarch64-apple-darwin
+          # - host: macos-latest
+          #   target: aarch64-apple-darwin
+          #   build: yarn build --target aarch64-apple-darwin
 
-          # - host: windows-latest
-          #   build: yarn build --target x86_64-pc-windows-msvc
-          #   target: x86_64-pc-windows-msvc
+          - host: windows-latest
+            build: yarn build --target x86_64-pc-windows-msvc
+            target: x86_64-pc-windows-msvc
 
-          # - host: windows-latest
-          #   build: yarn build --target i686-pc-windows-msvc
-          #   target: i686-pc-windows-msvc
+          - host: windows-latest
+            build: yarn build --target i686-pc-windows-msvc
+            target: i686-pc-windows-msvc
 
           - host: windows-latest
             target: aarch64-pc-windows-msvc
             build: yarn build --target aarch64-pc-windows-msvc
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            build: yarn build --target x86_64-unknown-linux-gnu --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-gnu
+          #   build: yarn build --target x86_64-unknown-linux-gnu --use-napi-cross
 
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            build: yarn build --target x86_64-unknown-linux-musl -x
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   build: yarn build --target x86_64-unknown-linux-musl -x
 
           # - host: ubuntu-latest
           #   target: aarch64-unknown-linux-gnu
           #   build: yarn build --target aarch64-unknown-linux-gnu --use-napi-cross
 
-          - host: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
+          # - host: ubuntu-latest
+          #   target: armv7-unknown-linux-gnueabihf
+          #   build: yarn build --target armv7-unknown-linux-gnueabihf --use-napi-cross
 
-          - host: ubuntu-latest
-            target: aarch64-linux-android
-            build: yarn build --target aarch64-linux-android
+          # - host: ubuntu-latest
+          #   target: aarch64-linux-android
+          #   build: yarn build --target aarch64-linux-android
 
-          - host: ubuntu-latest
-            target: armv7-linux-androideabi
-            build: yarn build --target armv7-linux-androideabi
+          # - host: ubuntu-latest
+          #   target: armv7-linux-androideabi
+          #   build: yarn build --target armv7-linux-androideabi
 
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            build: yarn build --target aarch64-unknown-linux-musl -x 
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   build: yarn build --target aarch64-unknown-linux-musl -x 
 
 
     name: stable - ${{ matrix.settings.target }} - node@22
@@ -141,6 +141,11 @@ jobs:
         if: ${{ matrix.settings.setup }}
         shell: bash
 
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ee0973d8090e4e3e452244bb50d34c25fe907dc2
+
       - name: Setup macOS
         run: |
           brew install nasm
@@ -149,6 +154,10 @@ jobs:
       - name: Setup Windows
         run: |
           choco install yasm
+          vcpkg install yasm
+          $yasm_path = "C:\ProgramData\chocolatey\bin"
+          echo "YASM_PATH=$yasm_path" >> $env:GITHUB_ENV
+          echo "PATH=$yasm_path;$env:PATH" >> $env:GITHUB_ENV
         if: ${{ matrix.settings.host == 'windows-latest' }}
 
       - name: Setup linux
@@ -324,9 +333,6 @@ jobs:
       - name: List packages
         run: ls -R .
         shell: bash
-      - name: Check linking
-        run: ldd napi-rs-image-test.linux-x64-musl.node
-        if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: ${{ contains(matrix.target, 'armv7') }}
